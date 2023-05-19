@@ -1,0 +1,75 @@
+﻿@model IEnumerable<AgendaDeTarefas.Models.DatasViewModel>
+
+@{
+    ViewData["Title"] = "Tarefas Cadastradas";
+}
+
+<div class="accordion" id="painelTarefas">
+    @foreach (var item in Model)
+    {
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-10">
+                        <button class="btn btn-link btn-block text-left" type="button" data-bs-toggle="collapse" data-bs-target="#@item.Identificadores">
+                            @item.Datas
+                        </button>
+                    </div>
+                    <div class="col-2">
+                        <a asp-action="CriarTarefa" asp-route-dataTarefa="@item.Datas" class="btn btn-sm btn-outline-dark">Nova Tarefa</a>
+                    </div>
+                </div>
+            </div>
+            <div id="@item.Identificadores" class="collapse show" data-bs-parent="#painelTarefas">
+                <div class="card-body">
+                    @await Component.InvokeAsync("ListaTarefas", item.Datas)
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div id="modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmação de Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Prosseguir com a exclusão da tarefa <span class="nomeTarefa"></span>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btnFechar" data-bs-dismiss="modal">Não</button>
+                <button type="button" class="btn btn-outline-danger" id="btnExcluir">Sim</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function ConfirmarExclusao(tarefaId, nomeTarefa) {
+            $(".nomeTarefa").text(nomeTarefa);
+            $(".modal").modal('show');
+
+            $("#btnExcluir").on('click', function () {
+                $.ajax({
+                    url: 'Tarefas/ExcluirTarefa',
+                    method: 'POST',
+                    data: { tarefaId: tarefaId },
+                    success: function (data) {
+                        $(".modal").modal('hide');
+                        location.reload(true);
+                    }
+                });
+            });
+
+            $('.btnFechar').on('click', function () {
+                tarefaId = null;
+                nomeTarefa = null;
+                $(".modal").modal('hide');
+            });
+        }
+    </script>
+}
+
